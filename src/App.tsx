@@ -1,26 +1,81 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from 'react'
+import {
+  Container,
+  Box,
+  Typography,
+  Paper,
+  ThemeProvider,
+  createTheme
+} from '@mui/material'
+import CssBaseline from '@mui/material/CssBaseline'
 
-function App() {
+import EnhancedTable from './components/EnhancedTable'
+import ThemeSwitch from './components/ThemeSwitch'
+
+import { astronautData, headCells } from './astronauts'
+
+const theme = createTheme({
+  palette: {
+    mode: 'dark'
+  }
+})
+
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+    <>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Paper
+          sx={{
+            minHeight: '100vh'
+          }}
         >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+          <Container maxWidth='md'>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                paddingTop: 10
+              }}
+            >
+              <Typography
+                variant='h1'
+                sx={{
+                  fontSize: 32,
+                  fontWeight: 700
+                }}
+              >
+                Astronaut Dashboard
+              </Typography>
 
-export default App;
+              <ThemeSwitch />
+            </Box>
+
+            <Typography
+              variant={'body2'}
+              sx={{
+                marginTop: 3
+              }}
+            >
+              Keep evidence of astronauts. Create, edit and delete them.
+            </Typography>
+
+            <Box
+              sx={{
+                marginTop: 4
+              }}
+            >
+              <EnhancedTable
+                headCells={headCells}
+                data={astronautData}
+                defaultOrderBy={headCells[0].id}
+              />
+            </Box>
+          </Container>
+        </Paper>
+      </ThemeProvider>
+    </>
+  )
+}
+export default App
