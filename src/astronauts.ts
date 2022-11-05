@@ -1,10 +1,11 @@
 import { HeadCell } from './components/EnhancedTableHead'
+import { Dayjs } from 'dayjs'
 
 export type Astronaut = {
   id: any
   firstName: string
   lastName: string
-  birthDate: string
+  birthDate: string | Dayjs | null
   ability: string
 }
 

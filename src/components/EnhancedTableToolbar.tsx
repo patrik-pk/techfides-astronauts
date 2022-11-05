@@ -18,6 +18,7 @@ const EnhancedTableToolbar = ({
       sx={{
         pl: { sm: 2 },
         pr: { xs: 1, sm: 1 },
+        borderRadius: 1,
         ...(selectedAmount > 0 && {
           bgcolor: theme =>
             alpha(

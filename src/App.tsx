@@ -1,30 +1,42 @@
-import React from 'react'
+import React, { useState } from 'react'
+import { useDispatch } from 'react-redux'
+import { openDialog } from './redux/features/dialogSlice'
 import {
   Container,
   Box,
   Typography,
   Paper,
   ThemeProvider,
+  Button,
   createTheme
 } from '@mui/material'
 import CssBaseline from '@mui/material/CssBaseline'
 
+import AddAstronautDialog from './components/AddAstronautDialog'
 import EnhancedTable from './components/EnhancedTable'
 import ThemeSwitch from './components/ThemeSwitch'
 
 import { astronautData, headCells } from './astronauts'
 
-const theme = createTheme({
-  palette: {
-    mode: 'dark'
-  }
-})
-
 const App = () => {
+  const [mode, setMode] = useState<'light' | 'dark'>('light')
+  const [addOpen, setAddOpen] = useState<boolean>(false)
+
+  const dispatch = useDispatch()
+
+  const theme = createTheme({
+    palette: {
+      mode
+    }
+  })
+
   return (
     <>
       <ThemeProvider theme={theme}>
         <CssBaseline />
+
+        <AddAstronautDialog open={addOpen} setOpen={setAddOpen} />
+
         <Paper
           sx={{
             minHeight: '100vh'
@@ -42,6 +54,7 @@ const App = () => {
               <Typography
                 variant='h1'
                 sx={{
+                  mr: 4,
                   fontSize: 32,
                   fontWeight: 700
                 }}
@@ -49,7 +62,9 @@ const App = () => {
                 Astronaut Dashboard
               </Typography>
 
-              <ThemeSwitch />
+              <ThemeSwitch
+                onChange={() => setMode(mode == 'light' ? 'dark' : 'light')}
+              />
             </Box>
 
             <Typography
@@ -61,9 +76,27 @@ const App = () => {
               Keep evidence of astronauts. Create, edit and delete them.
             </Typography>
 
-            <Box
+            <Button
+              variant='contained'
               sx={{
                 marginTop: 4
+              }}
+              onClick={() =>
+                dispatch(
+                  openDialog({
+                    type: 'addAstronaut',
+                    bool: true
+                  })
+                )
+              }
+            >
+              Add astronaut
+            </Button>
+
+            <Box
+              sx={{
+                marginTop: 4,
+                paddingBottom: 6
               }}
             >
               <EnhancedTable

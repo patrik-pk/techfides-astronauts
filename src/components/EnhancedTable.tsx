@@ -89,7 +89,26 @@ const EnhancedTable = ({
   )
 
   return (
-    <Paper>
+    <Paper
+      sx={{
+        p: {
+          xs: 1,
+          md: 2,
+          lg: 3
+        },
+        paddingBottom: {
+          xs: 0,
+          md: 0,
+          lg: 0
+        },
+        backgroundColor: theme =>
+          theme.palette.mode === 'dark'
+            ? theme.palette.grey['900']
+            : theme.palette.grey['100'],
+        boxShadow: 'none',
+        borderRadius: 2
+      }}
+    >
       <EnhancedTableToolbar selectedAmount={selected.length} />
       <TableContainer>
         <Table sx={{ minWidth: 650 }} aria-labelledby='tableTitle'>
