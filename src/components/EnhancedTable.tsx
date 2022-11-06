@@ -67,9 +67,11 @@ const EnhancedTable = ({
   }
 
   // sort data first
+  const copiedData = JSON.parse(JSON.stringify(data))
+
   const sortedData =
     typeof orderBy == 'string'
-      ? data.sort((a: any, b: any) => {
+      ? copiedData.sort((a: any, b: any) => {
           let orderTypeVal = order == 'desc' ? 1 : -1
 
           if (b[orderBy] < a[orderBy]) {
@@ -80,13 +82,15 @@ const EnhancedTable = ({
           }
           return 0
         })
-      : data
+      : copiedData
 
   // then slice sorted data according to pagination
   const slicedData = sortedData.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
   )
+
+  console.log(slicedData, 'result')
 
   return (
     <Paper
@@ -123,7 +127,7 @@ const EnhancedTable = ({
           />
 
           <TableBody>
-            {slicedData.map((item: any, i) => {
+            {slicedData.map((item: any, i: number) => {
               const isItemSelected = selected.indexOf(item.id) != -1
               const labelId = `enhanced-table-checkbox-${i}`
 

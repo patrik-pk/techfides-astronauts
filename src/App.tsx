@@ -1,6 +1,8 @@
-import React, { useState } from 'react'
-import { useDispatch } from 'react-redux'
+import React, { useState, useEffect } from 'react'
+import { collection, getDocs } from 'firebase/firestore'
+import { useDispatch, useSelector } from 'react-redux'
 import { openDialog } from './redux/features/dialogSlice'
+import { RootState } from './redux/store'
 import {
   Container,
   Box,
@@ -16,13 +18,61 @@ import AddAstronautDialog from './components/AddAstronautDialog'
 import EnhancedTable from './components/EnhancedTable'
 import ThemeSwitch from './components/ThemeSwitch'
 
-import { astronautData, headCells } from './astronauts'
+import { HeadCell } from './components/EnhancedTableHead'
+
+import { db } from './firebase/firebase'
+import { Astronaut, setAstronauts } from './redux/features/astronautSlice'
+
+import { useAppSelector } from './hooks/hooks'
+
+// import { astronautData, headCells } from './astronauts'
+
+export const astronautsCollectionRef = collection(db, 'astronauts')
+
+const headCells: HeadCell[] = [
+  {
+    label: 'First name',
+    id: 'firstName'
+  },
+  {
+    label: 'Last name',
+    id: 'lastName'
+    // align: 'center',
+  },
+  {
+    label: 'Birth date',
+    id: 'birthDate'
+  },
+  {
+    label: 'Ability',
+    id: 'ability'
+  }
+]
 
 const App = () => {
   const [mode, setMode] = useState<'light' | 'dark'>('light')
   const [addOpen, setAddOpen] = useState<boolean>(false)
-
   const dispatch = useDispatch()
+
+  // const [astronauts, setAstronauts] = useState<Astronaut[]>([])
+
+  useEffect(() => {
+    const getAstronauts = async () => {
+      const data = await getDocs(astronautsCollectionRef)
+      const formattedData: Astronaut[] = data.docs.map(
+        doc => ({ ...doc.data(), id: doc.id } as Astronaut)
+      )
+
+      console.log('set?', formattedData)
+      dispatch(setAstronauts(formattedData))
+    }
+
+    getAstronauts()
+  }, [])
+
+  const astronauts = useSelector((state: RootState) => state.astronaut.data)
+  // const astronauts = useAppSelector(state => state.astr)
+  // console.log('astron', astronauts)
 
   const theme = createTheme({
     palette: {
@@ -30,12 +80,16 @@ const App = () => {
     }
   })
 
+  useEffect(() => {
+    console.log('astro changed', astronauts)
+  }, [astronauts])
+
   return (
     <>
       <ThemeProvider theme={theme}>
         <CssBaseline />
 
-        <AddAstronautDialog open={addOpen} setOpen={setAddOpen} />
+        <AddAstronautDialog />
 
         <Paper
           sx={{
@@ -101,7 +155,7 @@ const App = () => {
             >
               <EnhancedTable
                 headCells={headCells}
-                data={astronautData}
+                data={astronauts}
                 defaultOrderBy={headCells[0].id}
               />
             </Box>

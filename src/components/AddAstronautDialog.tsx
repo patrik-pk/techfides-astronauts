@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from 'react'
+import { addDoc } from 'firebase/firestore'
 import { v4 as uuidv4 } from 'uuid'
 import dayjs, { Dayjs } from 'dayjs'
 import { useSelector, useDispatch } from 'react-redux'
-import { openDialog } from '../redux/features/dialogSlice'
+import {
+  openDialog,
+  setAstronaut,
+  setAstronautValue,
+  emptyAstronaut
+} from '../redux/features/dialogSlice'
+import { Astronaut } from '../redux/features/astronautSlice'
 import {
   Dialog,
   DialogTitle,
@@ -15,25 +22,12 @@ import {
 import { DesktopDatePicker, LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
-import { Astronaut } from '../astronauts'
+import { astronautsCollectionRef } from '../App'
 
-type AstronautForm = {
-  firstName: string
-  lastName: string
-  birthDate: string | Dayjs | null
-  ability: string
-}
-
-const emptyFormData = {
-  firstName: '',
-  lastName: '',
-  birthDate: dayjs('1980-01-01'),
-  ability: ''
-}
-
-const AddAstronautDialog = ({ type, open, setOpen }: any) => {
-  const [formData, setFormData] = useState<AstronautForm>(emptyFormData)
-  const isOpen = useSelector((state: any) => state.dialog.addAstronaut.isOpen)
+const AddAstronautDialog = () => {
+  const { isOpen, astronaut, isEditing } = useSelector(
+    (state: any) => state.dialog.addAstronaut
+  )
 
   const dispatch = useDispatch()
 
@@ -44,39 +38,42 @@ const AddAstronautDialog = ({ type, open, setOpen }: any) => {
       return
     }
 
-    setFormData({
-      ...formData,
-      [e.currentTarget.name]: e.currentTarget.value
-    })
+    const key = e.currentTarget.name
+    const value = e.currentTarget.value
+
+    dispatch(
+      setAstronautValue({
+        key,
+        value
+      })
+    )
   }
 
   const handleDateChange = (newValue: Dayjs | null) => {
     if (!newValue) {
       return
     }
-
-    setFormData({
-      ...formData,
-      birthDate: newValue
-    })
   }
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
     const id = uuidv4()
 
-    const astronaut: Astronaut = {
-      id,
-      ...formData
+    const newAstronaut: Astronaut = {
+      ...astronaut,
+      id
     }
+
+    await addDoc(astronautsCollectionRef, newAstronaut)
 
     console.log('add new astronaut', astronaut)
 
-    setFormData(emptyFormData)
+    dispatch(setAstronaut(emptyAstronaut))
+    // setFormData(emptyFormData)
   }
 
   useEffect(() => {
-    console.log(formData)
-  }, [formData])
+    console.log(astronaut)
+  }, [astronaut])
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -94,7 +91,7 @@ const AddAstronautDialog = ({ type, open, setOpen }: any) => {
         maxWidth={'xs'}
       >
         <DialogTitle>
-          {type == 'edit' ? 'Edit astronaut' : 'Add astronaut'}
+          {isEditing ? 'Edit astronaut' : 'Add astronaut'}
         </DialogTitle>
         <DialogContent>
           <TextField
@@ -106,6 +103,7 @@ const AddAstronautDialog = ({ type, open, setOpen }: any) => {
             type='text'
             variant='outlined'
             onChange={handleInputChange}
+            value={astronaut.firstName}
           />
           <TextField
             fullWidth
@@ -115,8 +113,9 @@ const AddAstronautDialog = ({ type, open, setOpen }: any) => {
             type='text'
             variant='outlined'
             onChange={handleInputChange}
+            value={astronaut.lastName}
           />
-          <DesktopDatePicker
+          {/* <DesktopDatePicker
             label='Datebirth'
             inputFormat='DD/MM/YYYY'
             value={formData.birthDate}
@@ -124,7 +123,7 @@ const AddAstronautDialog = ({ type, open, setOpen }: any) => {
             renderInput={(params: any) => (
               <TextField {...params} fullWidth margin='normal' />
             )}
-          />
+          /> */}
           <TextField
             fullWidth
             margin='normal'
@@ -133,6 +132,7 @@ const AddAstronautDialog = ({ type, open, setOpen }: any) => {
             type='text'
             variant='outlined'
             onChange={handleInputChange}
+            value={astronaut.ability}
           />
         </DialogContent>
         <DialogActions>
