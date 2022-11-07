@@ -23,9 +23,7 @@ import { setMode } from 'src/redux/features/themeSlice'
 import { getAstronautsFromDb } from 'src/shared/utils'
 
 const App = () => {
-  // const [mode, setMode] = useState<'light' | 'dark'>('light')
   const mode = useSelector((state: any) => state.theme.mode)
-
   const dispatch = useDispatch()
 
   useEffect(() => {
@@ -71,7 +69,11 @@ const App = () => {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                paddingTop: 10
+                paddingTop: {
+                  xs: 4,
+                  sm: 6,
+                  md: 10
+                }
               }}
             >
               <Typography
