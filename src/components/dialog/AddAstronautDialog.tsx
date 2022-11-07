@@ -1,23 +1,12 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import { addDoc, updateDoc, doc } from 'firebase/firestore'
-import { db } from '../../firebase/firebase'
 import { v4 as uuidv4 } from 'uuid'
 import dayjs, { Dayjs } from 'dayjs'
-import { useSelector, useDispatch } from 'react-redux'
-import {
-  openDialog,
-  setAstronautForm,
-  setAstronautValue,
-  emptyAstronaut,
-  setDialogLoading,
-  setShowErrors
-} from '../../redux/features/dialogSlice'
-import { setAstronauts } from '../../redux/features/astronautSlice'
 import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogContentText,
   TextField,
   DialogActions,
   Button,
@@ -27,16 +16,23 @@ import {
 import { DesktopDatePicker, LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
-import { astronautsCollectionRef } from '../../firebase/firebase'
-
-import { getAstronautsFromDb } from '../../shared/utils'
-
 import {
-  addAstronaut,
+  openDialog,
+  setAstronautForm,
+  setAstronautValue,
+  emptyAstronaut,
+  setDialogLoading,
+  setShowErrors
+} from 'src/redux/features/dialogSlice'
+import {
+  setAstronauts,
   setSelectedAstronauts
-} from '../../redux/features/astronautSlice'
+} from 'src/redux/features/astronautSlice'
 
-import { Astronaut } from '../../shared/types'
+import { getAstronautsFromDb } from 'src/shared/utils'
+import { db, astronautsCollectionRef } from 'src/firebase/firebase'
+
+import { Astronaut } from 'src/shared/types'
 
 const AddAstronautDialog = () => {
   const { isOpen, isEditing, astronaut, loading, showErrors } = useSelector(
@@ -68,13 +64,10 @@ const AddAstronautDialog = () => {
       return
     }
 
-    const formatted = value.format('LL')
-    console.log('date change value', formatted)
-
     dispatch(
       setAstronautValue({
         key: 'birthDate',
-        value: formatted
+        value: value.format('LL')
       })
     )
   }
@@ -84,9 +77,6 @@ const AddAstronautDialog = () => {
     let isValid = true
 
     keywords.forEach(key => {
-      console.log('keeey', key)
-      console.log('astro', astronaut)
-
       if (!astronaut[key].length) {
         isValid = false
       }
@@ -98,6 +88,15 @@ const AddAstronautDialog = () => {
     }
 
     return true
+  }
+
+  const setAddDialogLoading = (bool: boolean) => {
+    dispatch(
+      setDialogLoading({
+        type: 'addAstronaut',
+        bool
+      })
+    )
   }
 
   const addNewAstronaut = async () => {
@@ -112,12 +111,7 @@ const AddAstronautDialog = () => {
       id
     }
 
-    dispatch(
-      setDialogLoading({
-        type: 'addAstronaut',
-        bool: true
-      })
-    )
+    setAddDialogLoading(true)
 
     try {
       await addDoc(astronautsCollectionRef, newAstronaut)
@@ -125,37 +119,21 @@ const AddAstronautDialog = () => {
 
       dispatch(setAstronautForm(emptyAstronaut))
       dispatch(setAstronauts(data))
-      // dispatch(addAstronaut(newAstronaut))
       dispatch(
         openDialog({
           type: 'addAstronaut',
           bool: false
         })
       )
-      dispatch(
-        setDialogLoading({
-          type: 'addAstronaut',
-          bool: false
-        })
-      )
+      setAddDialogLoading(false)
     } catch (e) {
-      dispatch(
-        setDialogLoading({
-          type: 'addAstronaut',
-          bool: false
-        })
-      )
+      setAddDialogLoading(false)
       alert(e)
     }
   }
 
   const editExistingAstronaut = async () => {
-    dispatch(
-      setDialogLoading({
-        type: 'addAstronaut',
-        bool: true
-      })
-    )
+    setAddDialogLoading(true)
 
     try {
       const userDoc = doc(db, 'astronauts', astronaut.id)
@@ -171,20 +149,10 @@ const AddAstronautDialog = () => {
           bool: false
         })
       )
-      dispatch(
-        setDialogLoading({
-          type: 'addAstronaut',
-          bool: false
-        })
-      )
+      setAddDialogLoading(false)
     } catch (e) {
       alert(e)
-      dispatch(
-        setDialogLoading({
-          type: 'addAstronaut',
-          bool: false
-        })
-      )
+      setAddDialogLoading(false)
     }
   }
 
@@ -196,10 +164,6 @@ const AddAstronautDialog = () => {
 
     addNewAstronaut()
   }
-
-  useEffect(() => {
-    console.log(astronaut)
-  }, [astronaut])
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>

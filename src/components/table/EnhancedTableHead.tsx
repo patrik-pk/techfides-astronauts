@@ -57,7 +57,7 @@ const EnhancedTableHead = ({
             key={cell.id}
             sortDirection={orderBy === cell.id ? order : false}
             sx={{
-              width: 100,
+              width: '100%',
               fontWeight: 600
             }}
           >

@@ -1,35 +1,34 @@
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { doc, deleteDoc } from 'firebase/firestore'
-
-import { db } from '../../firebase/firebase'
-
 import {
   Dialog,
   DialogTitle,
   DialogContent,
   DialogContentText,
-  TextField,
   DialogActions,
   Button,
   CircularProgress,
   Box
 } from '@mui/material'
+
 import {
   Astronaut,
   setAstronauts,
   setSelectedAstronauts
 } from 'src/redux/features/astronautSlice'
-import { openDialog, setDialogLoading } from '../../redux/features/dialogSlice'
+import { openDialog, setDialogLoading } from 'src/redux/features/dialogSlice'
 
-import { getAstronautsFromDb } from '../../shared/utils'
+import { db } from 'src/firebase/firebase'
+
+import { getAstronautsFromDb } from 'src/shared/utils'
 
 const DeleteAstronautDialog = () => {
   const dispatch = useDispatch()
   const { isOpen, loading } = useSelector(
     (state: any) => state.dialog.confirmDelete
   )
-  const { data, selected } = useSelector((state: any) => state.astronaut)
+  const { selected } = useSelector((state: any) => state.astronaut)
 
   const close = () => {
     dispatch(
@@ -50,21 +49,15 @@ const DeleteAstronautDialog = () => {
 
     try {
       const selectedIds = selected.map((item: Astronaut) => item.id)
-      const userDocs = selectedIds.map((id: string) => {
+      const deletePromises = selectedIds.map((id: string) => {
         const newDoc = doc(db, 'astronauts', id)
         return deleteDoc(newDoc)
       })
 
-      await Promise.all(userDocs)
+      await Promise.all(deletePromises)
       const data = await getAstronautsFromDb()
 
       dispatch(setAstronauts(data))
-
-      // const newAstronauts = data.filter(
-      //   (item: Astronaut) => !selectedIds.includes(item.id)
-      // )
-
-      // dispatch(setAstronauts(newAstronauts))
       dispatch(setSelectedAstronauts([]))
       dispatch(
         setDialogLoading({

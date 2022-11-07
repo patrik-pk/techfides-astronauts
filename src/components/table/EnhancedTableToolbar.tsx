@@ -5,8 +5,8 @@ import { alpha } from '@mui/material/styles'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 
-import { Astronaut } from '../../shared/types'
-import { openEditAstronaut, openDialog } from '../../redux/features/dialogSlice'
+import { Astronaut } from 'src/shared/types'
+import { openEditAstronaut, openDialog } from 'src/redux/features/dialogSlice'
 
 type EnhancedTableToolbarProps = {
   selected: Astronaut[]

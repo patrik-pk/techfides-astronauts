@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import {
   Container,
   Box,
@@ -11,19 +11,20 @@ import {
 } from '@mui/material'
 import CssBaseline from '@mui/material/CssBaseline'
 
-import AddAstronautDialog from './components/dialog/AddAstronautDialog'
-import DeleteAstronautDialog from './components/dialog/DeleteAstronautDialog'
-import EnhancedTable from './components/table/EnhancedTable'
-import ThemeSwitch from './components/ThemeSwitch'
+import AddAstronautDialog from 'src/components/dialog/AddAstronautDialog'
+import DeleteAstronautDialog from 'src/components/dialog/DeleteAstronautDialog'
+import EnhancedTable from 'src/components/table/EnhancedTable'
+import ThemeSwitch from 'src/components/ThemeSwitch'
 
-import { setAstronauts, setLoading } from './redux/features/astronautSlice'
-import { openDialog } from './redux/features/dialogSlice'
+import { setAstronauts, setLoading } from 'src/redux/features/astronautSlice'
+import { openDialog } from 'src/redux/features/dialogSlice'
+import { setMode } from 'src/redux/features/themeSlice'
 
-import { getAstronautsFromDb } from './shared/utils'
+import { getAstronautsFromDb } from 'src/shared/utils'
 
 const App = () => {
-  const [mode, setMode] = useState<'light' | 'dark'>('light')
-  const [addOpen, setAddOpen] = useState<boolean>(false)
+  // const [mode, setMode] = useState<'light' | 'dark'>('light')
+  const mode = useSelector((state: any) => state.theme.mode)
 
   const dispatch = useDispatch()
 
@@ -81,11 +82,14 @@ const App = () => {
                   fontWeight: 700
                 }}
               >
-                Astronaut Dashboard A
+                Astronaut Dashboard
               </Typography>
 
               <ThemeSwitch
-                onChange={() => setMode(mode == 'light' ? 'dark' : 'light')}
+                onChange={() =>
+                  dispatch(setMode(mode == 'light' ? 'dark' : 'light'))
+                }
+                checked={mode == 'dark'}
               />
             </Box>
 

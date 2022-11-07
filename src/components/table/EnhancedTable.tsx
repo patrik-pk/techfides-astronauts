@@ -131,7 +131,10 @@ const EnhancedTable = () => {
     >
       <EnhancedTableToolbar selected={selected} />
       <TableContainer>
-        <Table sx={{ minWidth: 650 }} aria-labelledby='tableTitle'>
+        <Table
+          sx={{ minWidth: 650, tableLayout: 'fixed' }}
+          aria-labelledby='tableTitle'
+        >
           <EnhancedTableHead
             headCells={headCells}
             order={order}

@@ -1,5 +1,3 @@
-import React from 'react'
-import dayjs, { Dayjs } from 'dayjs'
 import { createSlice } from '@reduxjs/toolkit'
 import { PayloadAction } from '@reduxjs/toolkit/dist/createAction'
 
@@ -15,30 +13,23 @@ type AstronautState = {
   data: Array<Astronaut>
   selected: Array<Astronaut>
   loading: boolean
-  // headCells: Array<any>
 }
 
 const initialState: AstronautState = {
   data: [],
   selected: [],
   loading: false
-  // headCells
 }
 
 export const astronautSlice = createSlice({
   name: 'astronaut',
   initialState,
-  // initialState: 0,
   reducers: {
     setAstronauts: (
       state: AstronautState,
       action: PayloadAction<Astronaut[]>
     ) => {
       state.data = action.payload
-      console.log('update astronatus', state.data)
-    },
-    addAstronaut: (state: AstronautState, action: PayloadAction<Astronaut>) => {
-      state.data = [...state.data, action.payload]
     },
     setSelectedAstronauts: (
       state: AstronautState,
@@ -54,7 +45,6 @@ export const astronautSlice = createSlice({
 
 export const {
   setAstronauts,
-  addAstronaut,
   setSelectedAstronauts,
   setLoading
 } = astronautSlice.actions

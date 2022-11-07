@@ -20,7 +20,7 @@ export const sortData = (data: any, orderBy: string, order: 'asc' | 'desc') => {
       const dateA = Date.parse(a[orderBy])
       const dateB = Date.parse(b[orderBy])
 
-      // if value is not parsable to timestamp, make sure it stays on the bottom
+      // if value is not parsable to timestamp, make sure the item stays on the bottom
       if (isNaN(dateA)) {
         return 1
       }

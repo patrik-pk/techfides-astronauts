@@ -1,17 +1,9 @@
 import React from 'react'
 import dayjs, { Dayjs } from 'dayjs'
 import { createSlice } from '@reduxjs/toolkit'
-
-import { Astronaut } from './astronautSlice'
 import { PayloadAction } from '@reduxjs/toolkit/dist/createAction'
 
-// type AstronautData = {
-//   id: string | null
-//   firstName: string
-//   lastName: string
-//   birthDate: string | Dayjs | null
-//   ability: string
-// }
+import { Astronaut } from 'src/shared/types'
 
 interface Dialog {
   isOpen: boolean
@@ -86,6 +78,7 @@ export const dialogSlice = createSlice({
 
       state[type].isOpen = typeof bool == 'boolean' ? bool : !state[type].isOpen
 
+      // reset addAstronaut dialog on opening/closing
       if (type == 'addAstronaut') {
         state.addAstronaut = {
           ...state.addAstronaut,
