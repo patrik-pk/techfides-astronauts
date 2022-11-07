@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { addDoc } from 'firebase/firestore'
+import { addDoc, updateDoc, doc } from 'firebase/firestore'
+import { db } from '../firebase/firebase'
 import { v4 as uuidv4 } from 'uuid'
 import dayjs, { Dayjs } from 'dayjs'
 import { useSelector, useDispatch } from 'react-redux'
@@ -7,7 +8,9 @@ import {
   openDialog,
   setAstronaut,
   setAstronautValue,
-  emptyAstronaut
+  emptyAstronaut,
+  setDialogLoading,
+  setShowErrors
 } from '../redux/features/dialogSlice'
 import { Astronaut } from '../redux/features/astronautSlice'
 import {
@@ -17,15 +20,23 @@ import {
   DialogContentText,
   TextField,
   DialogActions,
-  Button
+  Button,
+  CircularProgress,
+  Box
 } from '@mui/material'
 import { DesktopDatePicker, LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
 import { astronautsCollectionRef } from '../App'
 
+import {
+  addAstronaut,
+  updateAstronaut,
+  setSelectedAstronauts
+} from '../redux/features/astronautSlice'
+
 const AddAstronautDialog = () => {
-  const { isOpen, astronaut, isEditing } = useSelector(
+  const { isOpen, isEditing, astronaut, loading, showErrors } = useSelector(
     (state: any) => state.dialog.addAstronaut
   )
 
@@ -49,13 +60,48 @@ const AddAstronautDialog = () => {
     )
   }
 
-  const handleDateChange = (newValue: Dayjs | null) => {
-    if (!newValue) {
+  const handleDateChange = (value: Dayjs | null) => {
+    if (!value) {
       return
     }
+
+    const formatted = value.format('LL')
+    console.log('date change value', formatted)
+
+    dispatch(
+      setAstronautValue({
+        key: 'birthDate',
+        value: formatted
+      })
+    )
   }
 
-  const onSubmit = async () => {
+  const isFormValid = () => {
+    const keywords = ['firstName', 'lastName', 'birthDate', 'ability']
+    let isValid = true
+
+    keywords.forEach(key => {
+      console.log('keeey', key)
+      console.log('astro', astronaut)
+
+      if (!astronaut[key].length) {
+        isValid = false
+      }
+    })
+
+    if (!isValid) {
+      dispatch(setShowErrors(true))
+      return false
+    }
+
+    return true
+  }
+
+  const addNewAstronaut = async () => {
+    if (!isFormValid()) {
+      return
+    }
+
     const id = uuidv4()
 
     const newAstronaut: Astronaut = {
@@ -63,12 +109,86 @@ const AddAstronautDialog = () => {
       id
     }
 
-    await addDoc(astronautsCollectionRef, newAstronaut)
+    dispatch(
+      setDialogLoading({
+        type: 'addAstronaut',
+        bool: true
+      })
+    )
 
-    console.log('add new astronaut', astronaut)
+    try {
+      await addDoc(astronautsCollectionRef, newAstronaut)
 
-    dispatch(setAstronaut(emptyAstronaut))
-    // setFormData(emptyFormData)
+      dispatch(setAstronaut(emptyAstronaut))
+      dispatch(addAstronaut(newAstronaut))
+      dispatch(
+        openDialog({
+          type: 'addAstronaut',
+          bool: false
+        })
+      )
+      dispatch(
+        setDialogLoading({
+          type: 'addAstronaut',
+          bool: false
+        })
+      )
+    } catch (e) {
+      dispatch(
+        setDialogLoading({
+          type: 'addAstronaut',
+          bool: false
+        })
+      )
+      alert(e)
+    }
+  }
+
+  const editExistingAstronaut = async () => {
+    dispatch(
+      setDialogLoading({
+        type: 'addAstronaut',
+        bool: true
+      })
+    )
+
+    try {
+      const userDoc = doc(db, 'astronauts', astronaut.id)
+      await updateDoc(userDoc, astronaut)
+
+      dispatch(setAstronaut(emptyAstronaut))
+      dispatch(updateAstronaut(astronaut))
+      dispatch(setSelectedAstronauts([]))
+      dispatch(
+        openDialog({
+          type: 'addAstronaut',
+          bool: false
+        })
+      )
+      dispatch(
+        setDialogLoading({
+          type: 'addAstronaut',
+          bool: false
+        })
+      )
+    } catch (e) {
+      alert(e)
+      dispatch(
+        setDialogLoading({
+          type: 'addAstronaut',
+          bool: false
+        })
+      )
+    }
+  }
+
+  const onSubmit = async () => {
+    if (isEditing) {
+      editExistingAstronaut()
+      return
+    }
+
+    addNewAstronaut()
   }
 
   useEffect(() => {
@@ -90,11 +210,25 @@ const AddAstronautDialog = () => {
         fullWidth={true}
         maxWidth={'xs'}
       >
+        {loading && (
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translateX(-50%) translateY(-50%)'
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        )}
+
         <DialogTitle>
           {isEditing ? 'Edit astronaut' : 'Add astronaut'}
         </DialogTitle>
         <DialogContent>
           <TextField
+            error={showErrors && !astronaut.firstName.length}
             autoFocus
             fullWidth
             margin='normal'
@@ -106,6 +240,7 @@ const AddAstronautDialog = () => {
             value={astronaut.firstName}
           />
           <TextField
+            error={showErrors && !astronaut.lastName.length}
             fullWidth
             margin='normal'
             name='lastName'
@@ -115,16 +250,17 @@ const AddAstronautDialog = () => {
             onChange={handleInputChange}
             value={astronaut.lastName}
           />
-          {/* <DesktopDatePicker
+          <DesktopDatePicker
             label='Datebirth'
             inputFormat='DD/MM/YYYY'
-            value={formData.birthDate}
+            value={dayjs(astronaut.birthDate)}
             onChange={handleDateChange}
             renderInput={(params: any) => (
               <TextField {...params} fullWidth margin='normal' />
             )}
-          /> */}
+          />
           <TextField
+            error={showErrors && !astronaut.ability.length}
             fullWidth
             margin='normal'
             name='ability'
@@ -148,7 +284,9 @@ const AddAstronautDialog = () => {
           >
             Cancel
           </Button>
-          <Button onClick={() => onSubmit()}>Add astronaut</Button>
+          <Button onClick={() => onSubmit()}>
+            {isEditing ? 'Edit astronaut' : 'Add astronaut'}
+          </Button>
         </DialogActions>
       </Dialog>
     </LocalizationProvider>

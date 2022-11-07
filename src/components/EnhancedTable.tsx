@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import {
   TableContainer,
   TablePagination,
@@ -8,10 +9,18 @@ import {
   TableRow,
   Paper,
   Box,
-  Checkbox
+  Checkbox,
+  CircularProgress
 } from '@mui/material'
 import EnhancedTableHead, { HeadCell } from './EnhancedTableHead'
 import EnhancedTableToolbar from './EnhancedTableToolbar'
+
+import {
+  Astronaut,
+  setSelectedAstronauts
+} from '../redux/features/astronautSlice'
+
+import { RootState } from '../redux/store'
 
 export type Order = 'asc' | 'desc'
 export type OrderBy = string | undefined
@@ -30,7 +39,12 @@ const EnhancedTable = ({
   const [orderBy, setOrderBy] = useState<OrderBy>(defaultOrderBy)
   const [rowsPerPage, setRowsPerPage] = useState(5)
   const [page, setPage] = useState(0)
-  const [selected, setSelected] = useState<any[]>([]) // selected contains array of id's
+
+  const { selected, loading } = useSelector(
+    (state: RootState) => state.astronaut
+  )
+  const dispatch = useDispatch()
+  // const [selected, setSelectedAstronauts] = useState<Astronaut[]>([])
 
   const handleChangeRowsPerPage = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -48,22 +62,23 @@ const EnhancedTable = ({
     setOrderBy(property)
   }
 
-  const selectItem = (id: any) => {
-    // remove id from selected if it contains it, otherwise add the id to selected
-    const newSelected: any[] = selected.includes(id)
-      ? selected.filter(selectedId => selectedId != id)
-      : [...selected, id]
+  const selectItem = (clickedItem: Astronaut) => {
+    const selectedIds = selected.map((item: Astronaut) => item.id)
 
-    setSelected(newSelected)
+    const newSelected = selectedIds.includes(clickedItem.id)
+      ? selected.filter((item: Astronaut) => item.id != clickedItem.id)
+      : [...selected, clickedItem]
+
+    dispatch(setSelectedAstronauts(newSelected))
   }
 
   const selectAllItems = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      const newSelected = data.map(item => item.id)
-      setSelected(newSelected)
+      const newSelected = data
+      dispatch(setSelectedAstronauts(newSelected))
       return
     }
-    setSelected([])
+    dispatch(setSelectedAstronauts([]))
   }
 
   // sort data first
@@ -90,11 +105,10 @@ const EnhancedTable = ({
     page * rowsPerPage + rowsPerPage
   )
 
-  console.log(slicedData, 'result')
-
   return (
     <Paper
       sx={{
+        position: 'relative',
         p: {
           xs: 1,
           md: 2,
@@ -113,7 +127,20 @@ const EnhancedTable = ({
         borderRadius: 2
       }}
     >
-      <EnhancedTableToolbar selectedAmount={selected.length} />
+      {loading && (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translateX(-50%) translateY(-50%)'
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      )}
+
+      <EnhancedTableToolbar selected={selected} />
       <TableContainer>
         <Table sx={{ minWidth: 650 }} aria-labelledby='tableTitle'>
           <EnhancedTableHead
@@ -127,14 +154,15 @@ const EnhancedTable = ({
           />
 
           <TableBody>
-            {slicedData.map((item: any, i: number) => {
-              const isItemSelected = selected.indexOf(item.id) != -1
+            {slicedData.map((item: Astronaut, i: number) => {
+              const selectedIds = selected.map((item: Astronaut) => item.id)
+              const isItemSelected = selectedIds.includes(item.id)
               const labelId = `enhanced-table-checkbox-${i}`
 
               return (
                 <TableRow
                   hover
-                  onClick={() => selectItem(item.id)}
+                  onClick={() => selectItem(item)}
                   role='checkbox'
                   aria-checked={isItemSelected}
                   tabIndex={-1}
@@ -151,13 +179,26 @@ const EnhancedTable = ({
                     />
                   </TableCell>
 
-                  {Object.keys(item)
+                  {/* Keys are not always in correct order */}
+                  {/* {Object.keys(item)
                     .filter(key => key != 'id')
                     .map((key, j) => (
                       <TableCell align={headCells[j].align || 'left'} key={j}>
                         {item[key]}
                       </TableCell>
-                    ))}
+                    ))} */}
+                  <TableCell align={headCells[0].align || 'left'}>
+                    {item.firstName}
+                  </TableCell>
+                  <TableCell align={headCells[1].align || 'left'}>
+                    {item.lastName}
+                  </TableCell>
+                  <TableCell align={headCells[2].align || 'left'}>
+                    {String(item.birthDate)}
+                  </TableCell>
+                  <TableCell align={headCells[3].align || 'left'}>
+                    {item.ability}
+                  </TableCell>
                 </TableRow>
               )
             })}

@@ -1,4 +1,5 @@
 import React from 'react'
+import { useDispatch } from 'react-redux'
 import { Toolbar, Typography, Tooltip, IconButton, Box } from '@mui/material'
 import { alpha } from '@mui/material/styles'
 import { visuallyHidden } from '@mui/utils'
@@ -6,20 +7,44 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import FilterListIcon from '@mui/icons-material/FilterList'
 
+import { Astronaut } from '../redux/features/astronautSlice'
+import { openEditAstronaut, openDialog } from '../redux/features/dialogSlice'
+
 type EnhancedTableToolbarProps = {
-  selectedAmount: number
+  selected: Astronaut[]
 }
 
-const EnhancedTableToolbar = ({
-  selectedAmount
-}: EnhancedTableToolbarProps) => {
+const EnhancedTableToolbar = ({ selected }: EnhancedTableToolbarProps) => {
+  const dispatch = useDispatch()
+
+  const editItems = () => {
+    if (selected.length != 1) {
+      return
+    }
+
+    dispatch(openEditAstronaut(selected[0]))
+  }
+
+  const deleteItems = () => {
+    if (!selected.length) {
+      return
+    }
+
+    dispatch(
+      openDialog({
+        type: 'confirmDelete',
+        bool: true
+      })
+    )
+  }
+
   return (
     <Toolbar
       sx={{
         pl: { sm: 2 },
         pr: { xs: 1, sm: 1 },
         borderRadius: 1,
-        ...(selectedAmount > 0 && {
+        ...(selected.length > 0 && {
           bgcolor: theme =>
             alpha(
               theme.palette.primary.main,
@@ -28,14 +53,14 @@ const EnhancedTableToolbar = ({
         })
       }}
     >
-      {selectedAmount > 0 ? (
+      {selected.length > 0 ? (
         <Typography
           sx={{ flex: '1 1 100%' }}
           color='inherit'
           variant='subtitle1'
           component='div'
         >
-          {selectedAmount} selected
+          {selected.length} selected
         </Typography>
       ) : (
         <Typography
@@ -47,21 +72,21 @@ const EnhancedTableToolbar = ({
           Astronaut Records
         </Typography>
       )}
-      {selectedAmount > 0 ? (
+      {selected.length > 0 ? (
         <Box
           sx={{
             display: 'flex'
           }}
         >
-          {selectedAmount == 1 && (
+          {selected.length == 1 && (
             <Tooltip title='Edit'>
-              <IconButton>
+              <IconButton onClick={() => editItems()}>
                 <EditIcon />
               </IconButton>
             </Tooltip>
           )}
           <Tooltip title='Delete'>
-            <IconButton>
+            <IconButton onClick={() => deleteItems()}>
               <DeleteIcon />
             </IconButton>
           </Tooltip>

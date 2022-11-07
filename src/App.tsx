@@ -15,15 +15,20 @@ import {
 import CssBaseline from '@mui/material/CssBaseline'
 
 import AddAstronautDialog from './components/AddAstronautDialog'
+import DeleteAstronautDialog from './components/DeleteAstronautDialog'
 import EnhancedTable from './components/EnhancedTable'
 import ThemeSwitch from './components/ThemeSwitch'
 
 import { HeadCell } from './components/EnhancedTableHead'
 
 import { db } from './firebase/firebase'
-import { Astronaut, setAstronauts } from './redux/features/astronautSlice'
+import {
+  Astronaut,
+  setAstronauts,
+  setLoading
+} from './redux/features/astronautSlice'
 
-import { useAppSelector } from './hooks/hooks'
+// import { useAppSelector } from './hooks/hooks'
 
 // import { astronautData, headCells } from './astronauts'
 
@@ -52,25 +57,34 @@ const headCells: HeadCell[] = [
 const App = () => {
   const [mode, setMode] = useState<'light' | 'dark'>('light')
   const [addOpen, setAddOpen] = useState<boolean>(false)
+
+  const astronauts = useSelector((state: RootState) => state.astronaut.data)
   const dispatch = useDispatch()
 
   // const [astronauts, setAstronauts] = useState<Astronaut[]>([])
 
   useEffect(() => {
     const getAstronauts = async () => {
-      const data = await getDocs(astronautsCollectionRef)
-      const formattedData: Astronaut[] = data.docs.map(
-        doc => ({ ...doc.data(), id: doc.id } as Astronaut)
-      )
+      dispatch(setLoading(true))
 
-      console.log('set?', formattedData)
-      dispatch(setAstronauts(formattedData))
+      try {
+        const data = await getDocs(astronautsCollectionRef)
+        const formattedData: Astronaut[] = data.docs.map(
+          doc => ({ ...doc.data(), id: doc.id } as Astronaut)
+        )
+
+        console.log('set?', formattedData)
+        dispatch(setAstronauts(formattedData))
+        dispatch(setLoading(false))
+      } catch (e) {
+        alert(e)
+        dispatch(setLoading(false))
+      }
     }
 
     getAstronauts()
   }, [])
 
-  const astronauts = useSelector((state: RootState) => state.astronaut.data)
   // const astronauts = useAppSelector(state => state.astr)
   // console.log('astron', astronauts)
 
@@ -90,6 +104,7 @@ const App = () => {
         <CssBaseline />
 
         <AddAstronautDialog />
+        <DeleteAstronautDialog />
 
         <Paper
           sx={{
