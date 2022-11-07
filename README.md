@@ -1,5 +1,18 @@
 # Techfies Astronauts
 
+Jednoduchá CRUD aplikace pro evidenci astronautů podle zadání.
+
+## Spuštění lokálně
+
+API klíč jsem nechal přímo v aplikaci, abyste si ji mohli ihned u sebe spustit.
+
+```
+git clone https://github.com/patrik-pk/techfides-astronauts.git
+cd techfides
+npm install
+npm start
+```
+
 ## Použité technologie
 
 ### [React.js](https://reactjs.org/)
@@ -21,6 +34,10 @@ Pro serverless řešení jsem použil Firebase databázi.
 ### [TypeSript](https://www.typescriptlang.org/)
 
 Celá aplikace je napsaná v TypeScriptu.
+
+## Hosting
+
+Pro hosting jsem využil služeb [Netlify](https://www.netlify.com/), které poskytují free-tier.
 
 ## Ukázka aplikace
 
