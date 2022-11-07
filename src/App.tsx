@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { collection, getDocs } from 'firebase/firestore'
-import { useDispatch, useSelector } from 'react-redux'
-import { openDialog } from './redux/features/dialogSlice'
-import { RootState } from './redux/store'
+import { useDispatch } from 'react-redux'
 import {
   Container,
   Box,
@@ -14,67 +11,30 @@ import {
 } from '@mui/material'
 import CssBaseline from '@mui/material/CssBaseline'
 
-import AddAstronautDialog from './components/AddAstronautDialog'
-import DeleteAstronautDialog from './components/DeleteAstronautDialog'
-import EnhancedTable from './components/EnhancedTable'
+import AddAstronautDialog from './components/dialog/AddAstronautDialog'
+import DeleteAstronautDialog from './components/dialog/DeleteAstronautDialog'
+import EnhancedTable from './components/table/EnhancedTable'
 import ThemeSwitch from './components/ThemeSwitch'
 
-import { HeadCell } from './components/EnhancedTableHead'
+import { setAstronauts, setLoading } from './redux/features/astronautSlice'
+import { openDialog } from './redux/features/dialogSlice'
 
-import { db } from './firebase/firebase'
-import {
-  Astronaut,
-  setAstronauts,
-  setLoading
-} from './redux/features/astronautSlice'
-
-// import { useAppSelector } from './hooks/hooks'
-
-// import { astronautData, headCells } from './astronauts'
-
-export const astronautsCollectionRef = collection(db, 'astronauts')
-
-const headCells: HeadCell[] = [
-  {
-    label: 'First name',
-    id: 'firstName'
-  },
-  {
-    label: 'Last name',
-    id: 'lastName'
-    // align: 'center',
-  },
-  {
-    label: 'Birth date',
-    id: 'birthDate'
-  },
-  {
-    label: 'Ability',
-    id: 'ability'
-  }
-]
+import { getAstronautsFromDb } from './shared/utils'
 
 const App = () => {
   const [mode, setMode] = useState<'light' | 'dark'>('light')
   const [addOpen, setAddOpen] = useState<boolean>(false)
 
-  const astronauts = useSelector((state: RootState) => state.astronaut.data)
   const dispatch = useDispatch()
-
-  // const [astronauts, setAstronauts] = useState<Astronaut[]>([])
 
   useEffect(() => {
     const getAstronauts = async () => {
       dispatch(setLoading(true))
 
       try {
-        const data = await getDocs(astronautsCollectionRef)
-        const formattedData: Astronaut[] = data.docs.map(
-          doc => ({ ...doc.data(), id: doc.id } as Astronaut)
-        )
+        const data = await getAstronautsFromDb()
 
-        console.log('set?', formattedData)
-        dispatch(setAstronauts(formattedData))
+        dispatch(setAstronauts(data))
         dispatch(setLoading(false))
       } catch (e) {
         alert(e)
@@ -85,18 +45,11 @@ const App = () => {
     getAstronauts()
   }, [])
 
-  // const astronauts = useAppSelector(state => state.astr)
-  // console.log('astron', astronauts)
-
   const theme = createTheme({
     palette: {
       mode
     }
   })
-
-  useEffect(() => {
-    console.log('astro changed', astronauts)
-  }, [astronauts])
 
   return (
     <>
@@ -128,7 +81,7 @@ const App = () => {
                   fontWeight: 700
                 }}
               >
-                Astronaut Dashboard
+                Astronaut Dashboard A
               </Typography>
 
               <ThemeSwitch
@@ -168,11 +121,7 @@ const App = () => {
                 paddingBottom: 6
               }}
             >
-              <EnhancedTable
-                headCells={headCells}
-                data={astronauts}
-                defaultOrderBy={headCells[0].id}
-              />
+              <EnhancedTable />
             </Box>
           </Container>
         </Paper>

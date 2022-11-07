@@ -46,7 +46,7 @@ const EnhancedTableHead = ({
             checked={itemsAmount > 0 && selectedAmount === itemsAmount}
             onChange={onSelectAllClick}
             inputProps={{
-              'aria-label': 'select all desserts'
+              'aria-label': 'select all astronauts'
             }}
           />
         </TableCell>

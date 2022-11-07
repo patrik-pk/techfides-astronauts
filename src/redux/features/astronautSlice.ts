@@ -40,14 +40,6 @@ export const astronautSlice = createSlice({
     addAstronaut: (state: AstronautState, action: PayloadAction<Astronaut>) => {
       state.data = [...state.data, action.payload]
     },
-    updateAstronaut: (
-      state: AstronautState,
-      action: PayloadAction<Astronaut>
-    ) => {
-      state.data = state.data.map(item =>
-        item.id == action.payload.id ? action.payload : item
-      )
-    },
     setSelectedAstronauts: (
       state: AstronautState,
       action: PayloadAction<Astronaut[]>
@@ -63,7 +55,6 @@ export const astronautSlice = createSlice({
 export const {
   setAstronauts,
   addAstronaut,
-  updateAstronaut,
   setSelectedAstronauts,
   setLoading
 } = astronautSlice.actions

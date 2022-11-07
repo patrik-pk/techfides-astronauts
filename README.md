@@ -1,6 +1,6 @@
 # Techfies Astronauts
 
-Jednoduchá CRUD aplikace pro evidenci astronautů podle zadání.
+Jednoduchá CRUD aplikace pro evidenci astronautů.
 
 ## Spuštění lokálně
 
@@ -8,7 +8,7 @@ API klíč jsem nechal přímo v aplikaci, abyste si ji mohli ihned u sebe spust
 
 ```
 git clone https://github.com/patrik-pk/techfides-astronauts.git
-cd techfides
+cd techfides-astronauts
 npm install
 npm start
 ```

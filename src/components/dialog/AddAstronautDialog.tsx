@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react'
 import { addDoc, updateDoc, doc } from 'firebase/firestore'
-import { db } from '../firebase/firebase'
+import { db } from '../../firebase/firebase'
 import { v4 as uuidv4 } from 'uuid'
 import dayjs, { Dayjs } from 'dayjs'
 import { useSelector, useDispatch } from 'react-redux'
 import {
   openDialog,
-  setAstronaut,
+  setAstronautForm,
   setAstronautValue,
   emptyAstronaut,
   setDialogLoading,
   setShowErrors
-} from '../redux/features/dialogSlice'
-import { Astronaut } from '../redux/features/astronautSlice'
+} from '../../redux/features/dialogSlice'
+import { setAstronauts } from '../../redux/features/astronautSlice'
 import {
   Dialog,
   DialogTitle,
@@ -27,13 +27,16 @@ import {
 import { DesktopDatePicker, LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
-import { astronautsCollectionRef } from '../App'
+import { astronautsCollectionRef } from '../../firebase/firebase'
+
+import { getAstronautsFromDb } from '../../shared/utils'
 
 import {
   addAstronaut,
-  updateAstronaut,
   setSelectedAstronauts
-} from '../redux/features/astronautSlice'
+} from '../../redux/features/astronautSlice'
+
+import { Astronaut } from '../../shared/types'
 
 const AddAstronautDialog = () => {
   const { isOpen, isEditing, astronaut, loading, showErrors } = useSelector(
@@ -118,9 +121,11 @@ const AddAstronautDialog = () => {
 
     try {
       await addDoc(astronautsCollectionRef, newAstronaut)
+      const data = await getAstronautsFromDb()
 
-      dispatch(setAstronaut(emptyAstronaut))
-      dispatch(addAstronaut(newAstronaut))
+      dispatch(setAstronautForm(emptyAstronaut))
+      dispatch(setAstronauts(data))
+      // dispatch(addAstronaut(newAstronaut))
       dispatch(
         openDialog({
           type: 'addAstronaut',
@@ -155,9 +160,10 @@ const AddAstronautDialog = () => {
     try {
       const userDoc = doc(db, 'astronauts', astronaut.id)
       await updateDoc(userDoc, astronaut)
+      const data = await getAstronautsFromDb()
 
-      dispatch(setAstronaut(emptyAstronaut))
-      dispatch(updateAstronaut(astronaut))
+      dispatch(setAstronautForm(emptyAstronaut))
+      dispatch(setAstronauts(data))
       dispatch(setSelectedAstronauts([]))
       dispatch(
         openDialog({

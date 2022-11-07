@@ -2,13 +2,11 @@ import React from 'react'
 import { useDispatch } from 'react-redux'
 import { Toolbar, Typography, Tooltip, IconButton, Box } from '@mui/material'
 import { alpha } from '@mui/material/styles'
-import { visuallyHidden } from '@mui/utils'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
-import FilterListIcon from '@mui/icons-material/FilterList'
 
-import { Astronaut } from '../redux/features/astronautSlice'
-import { openEditAstronaut, openDialog } from '../redux/features/dialogSlice'
+import { Astronaut } from '../../shared/types'
+import { openEditAstronaut, openDialog } from '../../redux/features/dialogSlice'
 
 type EnhancedTableToolbarProps = {
   selected: Astronaut[]
@@ -72,7 +70,7 @@ const EnhancedTableToolbar = ({ selected }: EnhancedTableToolbarProps) => {
           Astronaut Records
         </Typography>
       )}
-      {selected.length > 0 ? (
+      {selected.length > 0 && (
         <Box
           sx={{
             display: 'flex'
@@ -91,15 +89,7 @@ const EnhancedTableToolbar = ({ selected }: EnhancedTableToolbarProps) => {
             </IconButton>
           </Tooltip>
         </Box>
-      ) : null
-      // (
-      //   <Tooltip title='Filter list'>
-      //     <IconButton>
-      //       <FilterListIcon />
-      //     </IconButton>
-      //   </Tooltip>
-      // )
-      }
+      )}
     </Toolbar>
   )
 }

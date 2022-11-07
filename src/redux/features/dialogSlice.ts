@@ -129,7 +129,10 @@ export const dialogSlice = createSlice({
         [key]: value
       }
     },
-    setAstronaut: (state: DialogState, action: PayloadAction<Astronaut>) => {
+    setAstronautForm: (
+      state: DialogState,
+      action: PayloadAction<Astronaut>
+    ) => {
       state.addAstronaut.astronaut = action.payload
     },
     openEditAstronaut: (
@@ -148,7 +151,7 @@ export const dialogSlice = createSlice({
 
 export const {
   openDialog,
-  setAstronaut,
+  setAstronautForm,
   setAstronautValue,
   openEditAstronaut,
   setDialogLoading,

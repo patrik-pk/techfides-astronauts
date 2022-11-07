@@ -2,7 +2,7 @@ import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { doc, deleteDoc } from 'firebase/firestore'
 
-import { db } from '../firebase/firebase'
+import { db } from '../../firebase/firebase'
 
 import {
   Dialog,
@@ -20,11 +20,9 @@ import {
   setAstronauts,
   setSelectedAstronauts
 } from 'src/redux/features/astronautSlice'
-import {
-  openDialog,
-  setAstronaut,
-  setDialogLoading
-} from '../redux/features/dialogSlice'
+import { openDialog, setDialogLoading } from '../../redux/features/dialogSlice'
+
+import { getAstronautsFromDb } from '../../shared/utils'
 
 const DeleteAstronautDialog = () => {
   const dispatch = useDispatch()
@@ -58,12 +56,15 @@ const DeleteAstronautDialog = () => {
       })
 
       await Promise.all(userDocs)
+      const data = await getAstronautsFromDb()
 
-      const newAstronauts = data.filter(
-        (item: Astronaut) => !selectedIds.includes(item.id)
-      )
+      dispatch(setAstronauts(data))
 
-      dispatch(setAstronauts(newAstronauts))
+      // const newAstronauts = data.filter(
+      //   (item: Astronaut) => !selectedIds.includes(item.id)
+      // )
+
+      // dispatch(setAstronauts(newAstronauts))
       dispatch(setSelectedAstronauts([]))
       dispatch(
         setDialogLoading({

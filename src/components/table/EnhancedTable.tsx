@@ -8,43 +8,52 @@ import {
   TableCell,
   TableRow,
   Paper,
-  Box,
   Checkbox,
   CircularProgress
 } from '@mui/material'
+
 import EnhancedTableHead, { HeadCell } from './EnhancedTableHead'
 import EnhancedTableToolbar from './EnhancedTableToolbar'
 
-import {
-  Astronaut,
-  setSelectedAstronauts
-} from '../redux/features/astronautSlice'
+import { setSelectedAstronauts } from 'src/redux/features/astronautSlice'
 
-import { RootState } from '../redux/store'
+import { sortData } from 'src/shared/utils'
+import { Astronaut } from 'src/shared/types'
 
 export type Order = 'asc' | 'desc'
 export type OrderBy = string | undefined
 
-type SimpleTableProps = {
-  headCells: HeadCell[]
-  data: Array<any>
-  defaultOrderBy?: OrderBy
-}
-const EnhancedTable = ({
-  headCells,
-  data,
-  defaultOrderBy
-}: SimpleTableProps) => {
+const headCells: HeadCell[] = [
+  {
+    label: 'First name',
+    id: 'firstName'
+  },
+  {
+    label: 'Last name',
+    id: 'lastName'
+  },
+  {
+    label: 'Birth date',
+    id: 'birthDate'
+  },
+  {
+    label: 'Ability',
+    id: 'ability'
+  }
+]
+
+const defaultOrderBy = headCells[0].id
+
+const EnhancedTable = () => {
   const [order, setOrder] = useState<Order>('asc')
   const [orderBy, setOrderBy] = useState<OrderBy>(defaultOrderBy)
   const [rowsPerPage, setRowsPerPage] = useState(5)
   const [page, setPage] = useState(0)
 
-  const { selected, loading } = useSelector(
-    (state: RootState) => state.astronaut
+  const { data, selected, loading } = useSelector(
+    (state: any) => state.astronaut
   )
   const dispatch = useDispatch()
-  // const [selected, setSelectedAstronauts] = useState<Astronaut[]>([])
 
   const handleChangeRowsPerPage = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -53,15 +62,17 @@ const EnhancedTable = ({
     setPage(0)
   }
 
-  const handleRequestSort = (
-    event: React.MouseEvent<unknown>,
-    property: string
-  ) => {
+  // if newly clicked orderBy property is the same as current one,
+  // change order to opposite
+  // if it is different,
+  // set orderBy to new property and reset the order to "asc"
+  const handleRequestSort = (property: string) => {
     const isAsc = orderBy === property && order === 'asc'
     setOrder(isAsc ? 'desc' : 'asc')
     setOrderBy(property)
   }
 
+  // select/unselect single item
   const selectItem = (clickedItem: Astronaut) => {
     const selectedIds = selected.map((item: Astronaut) => item.id)
 
@@ -72,31 +83,22 @@ const EnhancedTable = ({
     dispatch(setSelectedAstronauts(newSelected))
   }
 
+  // select/unselect all items
   const selectAllItems = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      const newSelected = data
-      dispatch(setSelectedAstronauts(newSelected))
+      dispatch(setSelectedAstronauts(data))
       return
     }
     dispatch(setSelectedAstronauts([]))
   }
 
-  // sort data first
+  // avoid mutating data
   const copiedData = JSON.parse(JSON.stringify(data))
 
+  // sort data according to order and orderBy
   const sortedData =
     typeof orderBy == 'string'
-      ? copiedData.sort((a: any, b: any) => {
-          let orderTypeVal = order == 'desc' ? 1 : -1
-
-          if (b[orderBy] < a[orderBy]) {
-            return -1 * orderTypeVal
-          }
-          if (b[orderBy] > a[orderBy]) {
-            return 1 * orderTypeVal
-          }
-          return 0
-        })
+      ? sortData(copiedData, orderBy, order)
       : copiedData
 
   // then slice sorted data according to pagination
@@ -127,19 +129,6 @@ const EnhancedTable = ({
         borderRadius: 2
       }}
     >
-      {loading && (
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translateX(-50%) translateY(-50%)'
-          }}
-        >
-          <CircularProgress />
-        </Box>
-      )}
-
       <EnhancedTableToolbar selected={selected} />
       <TableContainer>
         <Table sx={{ minWidth: 650 }} aria-labelledby='tableTitle'>
@@ -149,11 +138,29 @@ const EnhancedTable = ({
             orderBy={orderBy}
             selectedAmount={selected.length}
             itemsAmount={data.length}
-            onRequestSort={handleRequestSort}
+            onRequestSort={(e, property: string) => handleRequestSort(property)}
             onSelectAllClick={selectAllItems}
           />
 
-          <TableBody>
+          <TableBody sx={{ position: 'relative' }}>
+            {/* "<div> cannot appear as a child of <tbody>" fixed with table row and cell */}
+            {loading && (
+              <TableRow>
+                <TableCell
+                  sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translateX(-50%) translateY(-50%)',
+                    border: 'none'
+                  }}
+                >
+                  <CircularProgress />
+                </TableCell>
+              </TableRow>
+            )}
+
+            {/* render data here */}
             {slicedData.map((item: Astronaut, i: number) => {
               const selectedIds = selected.map((item: Astronaut) => item.id)
               const isItemSelected = selectedIds.includes(item.id)
@@ -179,14 +186,6 @@ const EnhancedTable = ({
                     />
                   </TableCell>
 
-                  {/* Keys are not always in correct order */}
-                  {/* {Object.keys(item)
-                    .filter(key => key != 'id')
-                    .map((key, j) => (
-                      <TableCell align={headCells[j].align || 'left'} key={j}>
-                        {item[key]}
-                      </TableCell>
-                    ))} */}
                   <TableCell align={headCells[0].align || 'left'}>
                     {item.firstName}
                   </TableCell>
@@ -202,6 +201,17 @@ const EnhancedTable = ({
                 </TableRow>
               )
             })}
+
+            {/* create empty space if there are no items */}
+            {!slicedData.length && (
+              <TableRow
+                style={{
+                  height: '250px'
+                }}
+              >
+                <TableCell colSpan={6} />
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </TableContainer>
