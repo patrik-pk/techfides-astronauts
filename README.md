@@ -23,3 +23,5 @@ Pro serverless řešení jsem použil Firebase databázi.
 Celá aplikace je napsaná v TypeScriptu.
 
 ## Ukázka aplikace
+
+![Showcase](https://github.com/patrik-pk/techfides-astronauts/blob/master/showcase.png)
