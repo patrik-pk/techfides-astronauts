@@ -30,7 +30,7 @@ type OpenDialogPayload = {
 
 type SetAstronautValuePayload = {
   key: string
-  value: string
+  value: string | number
 }
 
 type SetDialogLoadingPayload = {
@@ -42,8 +42,8 @@ export const emptyAstronaut: Astronaut = {
   id: '',
   firstName: '',
   lastName: '',
-  birthDate: 'January 1, 1980',
-  ability: ''
+  birthDate: 0,
+  ability: '',
 }
 
 const initialState: DialogState = {
@@ -52,12 +52,12 @@ const initialState: DialogState = {
     loading: false,
     showErrors: false,
     isEditing: false,
-    astronaut: emptyAstronaut
+    astronaut: emptyAstronaut,
   },
   confirmDelete: {
     isOpen: false,
-    loading: false
-  }
+    loading: false,
+  },
 }
 
 export const dialogSlice = createSlice({
@@ -84,7 +84,7 @@ export const dialogSlice = createSlice({
           ...state.addAstronaut,
           isEditing: false,
           showErrors: false,
-          astronaut: emptyAstronaut
+          astronaut: emptyAstronaut,
         }
       }
     },
@@ -108,7 +108,7 @@ export const dialogSlice = createSlice({
 
       state.addAstronaut.astronaut = {
         ...state.addAstronaut.astronaut,
-        birthDate: newValue
+        birthDate: newValue,
       }
     },
     setAstronautValue: (
@@ -119,7 +119,7 @@ export const dialogSlice = createSlice({
 
       state.addAstronaut.astronaut = {
         ...state.addAstronaut.astronaut,
-        [key]: value
+        [key]: value,
       }
     },
     setAstronautForm: (
@@ -136,10 +136,10 @@ export const dialogSlice = createSlice({
         ...state.addAstronaut,
         isOpen: true,
         isEditing: true,
-        astronaut: action.payload
+        astronaut: action.payload,
       }
-    }
-  }
+    },
+  },
 })
 
 export const {
@@ -148,5 +148,5 @@ export const {
   setAstronautValue,
   openEditAstronaut,
   setDialogLoading,
-  setShowErrors
+  setShowErrors,
 } = dialogSlice.actions

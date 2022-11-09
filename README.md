@@ -27,10 +27,6 @@ Pro state management jsem použil Redux Toolkit jakožto jednodušší verzi Red
 
 Jako UI knihovnu jsem použil Material UI, která mi pomohla sestavit komplexnější komponenty, jako např. tabulku, nebo modální okno.
 
-### [Firebase](https://firebase.google.com/)
-
-Pro serverless řešení jsem použil Firebase databázi.
-
 ### [TypeSript](https://www.typescriptlang.org/)
 
 Celá aplikace je napsaná v TypeScriptu.

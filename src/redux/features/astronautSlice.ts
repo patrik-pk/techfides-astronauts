@@ -1,13 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { PayloadAction } from '@reduxjs/toolkit/dist/createAction'
-
-export type Astronaut = {
-  id: string
-  firstName: string
-  lastName: string
-  birthDate: string
-  ability: string
-}
+import { Astronaut } from 'src/shared/types'
 
 type AstronautState = {
   data: Array<Astronaut>
@@ -18,7 +11,7 @@ type AstronautState = {
 const initialState: AstronautState = {
   data: [],
   selected: [],
-  loading: false
+  loading: false,
 }
 
 export const astronautSlice = createSlice({
@@ -39,12 +32,9 @@ export const astronautSlice = createSlice({
     },
     setLoading: (state: AstronautState, action: PayloadAction<boolean>) => {
       state.loading = action.payload
-    }
-  }
+    },
+  },
 })
 
-export const {
-  setAstronauts,
-  setSelectedAstronauts,
-  setLoading
-} = astronautSlice.actions
+export const { setAstronauts, setSelectedAstronauts, setLoading } =
+  astronautSlice.actions

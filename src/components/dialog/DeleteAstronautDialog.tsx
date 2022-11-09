@@ -1,6 +1,6 @@
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { doc, deleteDoc } from 'firebase/firestore'
+import axios from 'axios'
 import {
   Dialog,
   DialogTitle,
@@ -9,19 +9,17 @@ import {
   DialogActions,
   Button,
   CircularProgress,
-  Box
+  Box,
 } from '@mui/material'
 
 import {
-  Astronaut,
   setAstronauts,
-  setSelectedAstronauts
+  setSelectedAstronauts,
 } from 'src/redux/features/astronautSlice'
 import { openDialog, setDialogLoading } from 'src/redux/features/dialogSlice'
 
-import { db } from 'src/firebase/firebase'
-
 import { getAstronautsFromDb } from 'src/shared/utils'
+import { Astronaut } from 'src/shared/types'
 
 const DeleteAstronautDialog = () => {
   const dispatch = useDispatch()
@@ -34,7 +32,7 @@ const DeleteAstronautDialog = () => {
     dispatch(
       openDialog({
         type: 'confirmDelete',
-        bool: false
+        bool: false,
       })
     )
   }
@@ -43,18 +41,14 @@ const DeleteAstronautDialog = () => {
     dispatch(
       setDialogLoading({
         type: 'confirmDelete',
-        bool: true
+        bool: true,
       })
     )
 
     try {
       const selectedIds = selected.map((item: Astronaut) => item.id)
-      const deletePromises = selectedIds.map((id: string) => {
-        const newDoc = doc(db, 'astronauts', id)
-        return deleteDoc(newDoc)
-      })
 
-      await Promise.all(deletePromises)
+      await axios.delete(`astronaut/${selectedIds}`)
       const data = await getAstronautsFromDb()
 
       dispatch(setAstronauts(data))
@@ -62,7 +56,7 @@ const DeleteAstronautDialog = () => {
       dispatch(
         setDialogLoading({
           type: 'confirmDelete',
-          bool: false
+          bool: false,
         })
       )
       close()
@@ -70,7 +64,7 @@ const DeleteAstronautDialog = () => {
       dispatch(
         setDialogLoading({
           type: 'confirmDelete',
-          bool: false
+          bool: false,
         })
       )
       alert(e)
@@ -84,7 +78,7 @@ const DeleteAstronautDialog = () => {
         dispatch(
           openDialog({
             type: 'confirmDelete',
-            bool: false
+            bool: false,
           })
         )
       }
@@ -97,7 +91,7 @@ const DeleteAstronautDialog = () => {
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translateX(-50%) translateY(-50%)'
+            transform: 'translateX(-50%) translateY(-50%)',
           }}
         >
           <CircularProgress />

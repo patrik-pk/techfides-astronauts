@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import axios from 'axios'
+import dayjs from 'dayjs'
 import {
   Container,
   Box,
@@ -7,7 +9,7 @@ import {
   Paper,
   ThemeProvider,
   Button,
-  createTheme
+  createTheme,
 } from '@mui/material'
 import CssBaseline from '@mui/material/CssBaseline'
 
@@ -21,6 +23,12 @@ import { openDialog } from 'src/redux/features/dialogSlice'
 import { setMode } from 'src/redux/features/themeSlice'
 
 import { getAstronautsFromDb } from 'src/shared/utils'
+import { Astronaut } from 'src/shared/types'
+
+axios.defaults.baseURL =
+  process.env.NODE_ENV === 'development'
+    ? process.env.REACT_APP_API_URL_DEV
+    : process.env.REACT_APP_API_URL_PROD
 
 const App = () => {
   const mode = useSelector((state: any) => state.theme.mode)
@@ -32,11 +40,10 @@ const App = () => {
 
       try {
         const data = await getAstronautsFromDb()
-
         dispatch(setAstronauts(data))
         dispatch(setLoading(false))
-      } catch (e) {
-        alert(e)
+      } catch (err) {
+        alert(err)
         dispatch(setLoading(false))
       }
     }
@@ -46,8 +53,8 @@ const App = () => {
 
   const theme = createTheme({
     palette: {
-      mode
-    }
+      mode,
+    },
   })
 
   return (
@@ -60,7 +67,7 @@ const App = () => {
 
         <Paper
           sx={{
-            minHeight: '100vh'
+            minHeight: '100vh',
           }}
         >
           <Container maxWidth='md'>
@@ -72,8 +79,8 @@ const App = () => {
                 paddingTop: {
                   xs: 4,
                   sm: 6,
-                  md: 10
-                }
+                  md: 10,
+                },
               }}
             >
               <Typography
@@ -81,7 +88,7 @@ const App = () => {
                 sx={{
                   mr: 4,
                   fontSize: 32,
-                  fontWeight: 700
+                  fontWeight: 700,
                 }}
               >
                 Astronaut Dashboard D
@@ -98,7 +105,7 @@ const App = () => {
             <Typography
               variant={'body2'}
               sx={{
-                marginTop: 3
+                marginTop: 3,
               }}
             >
               Keep evidence of astronauts. Create, edit and delete them.
@@ -107,13 +114,13 @@ const App = () => {
             <Button
               variant='contained'
               sx={{
-                marginTop: 4
+                marginTop: 4,
               }}
               onClick={() =>
                 dispatch(
                   openDialog({
                     type: 'addAstronaut',
-                    bool: true
+                    bool: true,
                   })
                 )
               }
@@ -124,7 +131,7 @@ const App = () => {
             <Box
               sx={{
                 marginTop: 4,
-                paddingBottom: 6
+                paddingBottom: 6,
               }}
             >
               <EnhancedTable />

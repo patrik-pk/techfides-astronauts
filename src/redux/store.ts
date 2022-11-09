@@ -8,11 +8,12 @@ import { themeSlice } from './features/themeSlice'
 const rootReducer = combineReducers({
   dialog: dialogSlice.reducer,
   astronaut: astronautSlice.reducer,
-  theme: themeSlice.reducer
+  theme: themeSlice.reducer,
 } as any)
 
 export const store: EnhancedStore = configureStore({
-  reducer: rootReducer
+  reducer: rootReducer,
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware(),
 })
 
 export type RootState = ReturnType<typeof rootReducer>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
+import dayjs from 'dayjs'
 import {
   TableContainer,
   TablePagination,
@@ -9,7 +10,7 @@ import {
   TableRow,
   Paper,
   Checkbox,
-  CircularProgress
+  CircularProgress,
 } from '@mui/material'
 
 import EnhancedTableHead, { HeadCell } from './EnhancedTableHead'
@@ -26,20 +27,20 @@ export type OrderBy = string | undefined
 const headCells: HeadCell[] = [
   {
     label: 'First name',
-    id: 'firstName'
+    id: 'firstName',
   },
   {
     label: 'Last name',
-    id: 'lastName'
+    id: 'lastName',
   },
   {
     label: 'Birth date',
-    id: 'birthDate'
+    id: 'birthDate',
   },
   {
     label: 'Ability',
-    id: 'ability'
-  }
+    id: 'ability',
+  },
 ]
 
 const defaultOrderBy = headCells[0].id
@@ -114,19 +115,19 @@ const EnhancedTable = () => {
         p: {
           xs: 1,
           md: 2,
-          lg: 3
+          lg: 3,
         },
         paddingBottom: {
           xs: 0,
           md: 0,
-          lg: 0
+          lg: 0,
         },
-        backgroundColor: theme =>
+        backgroundColor: (theme) =>
           theme.palette.mode === 'dark'
             ? theme.palette.grey['900']
             : theme.palette.grey['100'],
         boxShadow: 'none',
-        borderRadius: 2
+        borderRadius: 2,
       }}
     >
       <EnhancedTableToolbar selected={selected} />
@@ -155,7 +156,7 @@ const EnhancedTable = () => {
                     top: '50%',
                     left: '50%',
                     transform: 'translateX(-50%) translateY(-50%)',
-                    border: 'none'
+                    border: 'none',
                   }}
                 >
                   <CircularProgress />
@@ -184,7 +185,7 @@ const EnhancedTable = () => {
                       color='primary'
                       checked={isItemSelected}
                       inputProps={{
-                        'aria-labelledby': labelId
+                        'aria-labelledby': labelId,
                       }}
                     />
                   </TableCell>
@@ -196,7 +197,7 @@ const EnhancedTable = () => {
                     {item.lastName}
                   </TableCell>
                   <TableCell align={headCells[2].align || 'left'}>
-                    {String(item.birthDate)}
+                    {dayjs.unix(item.birthDate).format('LL')}
                   </TableCell>
                   <TableCell align={headCells[3].align || 'left'}>
                     {item.ability}
@@ -209,7 +210,7 @@ const EnhancedTable = () => {
             {!slicedData.length && (
               <TableRow
                 style={{
-                  height: '250px'
+                  height: '250px',
                 }}
               >
                 <TableCell colSpan={6} />

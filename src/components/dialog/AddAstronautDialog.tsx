@@ -1,7 +1,6 @@
 import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { addDoc, updateDoc, doc } from 'firebase/firestore'
-import { v4 as uuidv4 } from 'uuid'
+import axios from 'axios'
 import dayjs, { Dayjs } from 'dayjs'
 import {
   Dialog,
@@ -11,7 +10,7 @@ import {
   DialogActions,
   Button,
   CircularProgress,
-  Box
+  Box,
 } from '@mui/material'
 import { DesktopDatePicker, LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
@@ -22,17 +21,14 @@ import {
   setAstronautValue,
   emptyAstronaut,
   setDialogLoading,
-  setShowErrors
+  setShowErrors,
 } from 'src/redux/features/dialogSlice'
 import {
   setAstronauts,
-  setSelectedAstronauts
+  setSelectedAstronauts,
 } from 'src/redux/features/astronautSlice'
 
 import { getAstronautsFromDb } from 'src/shared/utils'
-import { db, astronautsCollectionRef } from 'src/firebase/firebase'
-
-import { Astronaut } from 'src/shared/types'
 
 const AddAstronautDialog = () => {
   const { isOpen, isEditing, astronaut, loading, showErrors } = useSelector(
@@ -54,7 +50,7 @@ const AddAstronautDialog = () => {
     dispatch(
       setAstronautValue({
         key,
-        value
+        value,
       })
     )
   }
@@ -67,7 +63,7 @@ const AddAstronautDialog = () => {
     dispatch(
       setAstronautValue({
         key: 'birthDate',
-        value: value.format('LL')
+        value: dayjs(value).unix(),
       })
     )
   }
@@ -76,8 +72,8 @@ const AddAstronautDialog = () => {
     const keywords = ['firstName', 'lastName', 'birthDate', 'ability']
     let isValid = true
 
-    keywords.forEach(key => {
-      if (!astronaut[key].length) {
+    keywords.forEach((key) => {
+      if (typeof astronaut[key] == 'string' && !astronaut[key].length) {
         isValid = false
       }
     })
@@ -94,7 +90,7 @@ const AddAstronautDialog = () => {
     dispatch(
       setDialogLoading({
         type: 'addAstronaut',
-        bool
+        bool,
       })
     )
   }
@@ -104,17 +100,10 @@ const AddAstronautDialog = () => {
       return
     }
 
-    const id = uuidv4()
-
-    const newAstronaut: Astronaut = {
-      ...astronaut,
-      id
-    }
-
     setAddDialogLoading(true)
 
     try {
-      await addDoc(astronautsCollectionRef, newAstronaut)
+      await axios.post('astronaut', astronaut)
       const data = await getAstronautsFromDb()
 
       dispatch(setAstronautForm(emptyAstronaut))
@@ -122,7 +111,7 @@ const AddAstronautDialog = () => {
       dispatch(
         openDialog({
           type: 'addAstronaut',
-          bool: false
+          bool: false,
         })
       )
       setAddDialogLoading(false)
@@ -133,11 +122,14 @@ const AddAstronautDialog = () => {
   }
 
   const editExistingAstronaut = async () => {
+    if (!isFormValid()) {
+      return
+    }
+
     setAddDialogLoading(true)
 
     try {
-      const userDoc = doc(db, 'astronauts', astronaut.id)
-      await updateDoc(userDoc, astronaut)
+      await axios.put(`astronaut/${astronaut.id}`, astronaut)
       const data = await getAstronautsFromDb()
 
       dispatch(setAstronautForm(emptyAstronaut))
@@ -146,7 +138,7 @@ const AddAstronautDialog = () => {
       dispatch(
         openDialog({
           type: 'addAstronaut',
-          bool: false
+          bool: false,
         })
       )
       setAddDialogLoading(false)
@@ -173,7 +165,7 @@ const AddAstronautDialog = () => {
           dispatch(
             openDialog({
               type: 'addAstronaut',
-              bool: false
+              bool: false,
             })
           )
         }
@@ -186,7 +178,7 @@ const AddAstronautDialog = () => {
               position: 'absolute',
               top: '50%',
               left: '50%',
-              transform: 'translateX(-50%) translateY(-50%)'
+              transform: 'translateX(-50%) translateY(-50%)',
             }}
           >
             <CircularProgress />
@@ -223,7 +215,7 @@ const AddAstronautDialog = () => {
           <DesktopDatePicker
             label='Datebirth'
             inputFormat='DD/MM/YYYY'
-            value={dayjs(astronaut.birthDate)}
+            value={dayjs.unix(astronaut.birthDate)}
             onChange={handleDateChange}
             renderInput={(params: any) => (
               <TextField {...params} fullWidth margin='normal' />
@@ -247,7 +239,7 @@ const AddAstronautDialog = () => {
               dispatch(
                 openDialog({
                   type: 'addAstronaut',
-                  bool: false
+                  bool: false,
                 })
               )
             }
