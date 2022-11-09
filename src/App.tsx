@@ -84,7 +84,7 @@ const App = () => {
                   fontWeight: 700
                 }}
               >
-                Astronaut Dashboard
+                Astronaut Dashboard D
               </Typography>
 
               <ThemeSwitch
